@@ -6,6 +6,9 @@ import math
 import requests
 import json
 
+# hide useless tracebacks (not needed for production use)
+sys.tracebacklimit = 0
+
 # program info
 __author__ = "Jon-Mailes 'Jonniboy' Gr"
 __copyright__ = "Copyright 2017 - Jon-Mailes 'Jonniboy' Gr"
@@ -19,6 +22,10 @@ MXAPI_SEARCH_URL = "https://{site}.mania-exchange.com/tracksearch2/search"
 MXAPI_DOWNLOAD_URL = "https://{site}.mania-exchange.com/tracks/download/"
 MXAPI_ALLOWED_SITES = ["tm", "sm"]
 DEFAULT_ARGS = {"api": "on", "format": "json", "limit": 1}
+
+
+def exception_handler(exception_type, exception, traceback):
+    print("%s: %s" % (exception_type.__name__, exception))
 
 
 def parse_args(args={}):
@@ -48,10 +55,15 @@ def parse_args(args={}):
 
 
 def search_maps(args, site):
-    r = requests.get(MXAPI_SEARCH_URL.replace("{site}", site), params=args)
-    data = json.loads(r.text)
+    url = MXAPI_SEARCH_URL.replace("{site}", site)
+    r = requests.get(url, params=args)
 
-    return data["totalItemCount"]
+    if r.status_code == 200:
+        data = json.loads(r.text)
+
+        return data["totalItemCount"]
+    else:
+        raise IOError("'" + url + "' could not be reached! HTTP Code: " + str(r.status_code))
 
 
 def get_map_list(args, site, count=None, limit=-1):
@@ -80,8 +92,9 @@ def get_map_list(args, site, count=None, limit=-1):
 
 def download_maps(maps, path, site):
     for map_ in maps:
-        r = requests.get(MXAPI_DOWNLOAD_URL.replace(
-            "{site}", site) + str(map_["TrackID"]))
+        url = MXAPI_DOWNLOAD_URL.replace(
+            "{site}", site) + str(map_["TrackID"])
+        r = requests.get(url)
 
         if r.status_code == 200:
             fn = os.path.join(os.path.dirname(__file__), path, map_[
@@ -92,7 +105,9 @@ def download_maps(maps, path, site):
                     for chunk in r:
                         f.write(chunk)
             except FileExistsError:
-                pass
+                print("File '" + fn + "' already exists. Skipped!")
+        else:
+            raise IOError("'" + url + "' could not be reached! HTTP Code: " + str(r.status_code))
 
 
 def main():
@@ -107,8 +122,12 @@ def main():
 
     # if there are any maps found, wait for accepting the download
     if total_count > 0:
-        print("Found " + str(total_count) +
-              " maps. Do you want to download them now?")
+        if limit > 0:
+            print("Found " + str(total_count) +
+                  " maps. Do you want to download " + str(limit) + " of them now?")
+        else:
+            print("Found " + str(total_count) +
+                  " maps. Do you want to download them now?")
     else:
         print("No maps found for your search parameters. Try again!")
 
@@ -132,6 +151,9 @@ def main():
 
 
 if __name__ == '__main__':
+    # show readable errors (comment for debugging)
+    sys.excepthook = exception_handler
+
     print(u'#################################################################')
     print(u'#               Mania-Exchange.com Map Downloader               #')
     print(u'# (C) by Jon-Mailes "Jonniboy" Gr. (mail ät jonni pünktchen it) #')
