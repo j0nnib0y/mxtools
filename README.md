@@ -6,7 +6,7 @@ Downloads all maps with the specified attributes from sm.mania-exchange.com or t
 
 **Usage:**
 
-*downloader.py*   *tm* or *sm*   *arg1=val1 arg2=val2*
+*downloader.py*    *tm* or *sm*    *arg1=val1 arg2=val2*
 
 **Possible arguments:**
 - path (download path)
