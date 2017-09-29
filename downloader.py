@@ -120,9 +120,11 @@ def download_maps(maps, path, newname, site):
 def main():
     # process args to get settings
     site, args, path, newname, limit = parse_args(DEFAULT_ARGS)
-    print("Site:\t" + str(site))
-    print("Args:\t" + str(args))
-    print("Limit:\t" + str(limit) + "\n")
+    print("Site:\t\t" + str(site))
+    print("Args:\t\t" + str(args))
+    print("Path:\t\t" + str(path))
+    print("Newname:\t" + str(newname))
+    print("Limit:\t\t" + str(limit) + "\n")
 
     # process search
     total_count = search_maps(args, site)
