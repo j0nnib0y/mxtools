@@ -10,6 +10,7 @@ Downloads all maps with the specified attributes from sm.mania-exchange.com or t
 
 **Possible arguments:**
 - path (download path, must exist already)
+- newname ("gbx" for the original Gbx file name, "mx" for the name on Mania-Exchange; "gbx" is default) 
 - limit (number of maps which get downloaded)
 
 ... and all arguments from this site at Track Search: https://api.mania-exchange.com/documents/reference
