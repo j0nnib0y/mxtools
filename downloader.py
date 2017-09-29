@@ -32,6 +32,7 @@ def parse_args(args={}):
     limit = -1
     site = "tm"
     path = "./"
+    newname = "gbx"
 
     for arg in sys.argv[1:]:
         if '=' in arg:
@@ -41,8 +42,10 @@ def parse_args(args={}):
             else:
                 if key == "limit":
                     limit = int(value)
-                if key == "path":
+                elif key == "path":
                     path = str(value)
+                elif key == "newname":
+                    newname = str(value)
                 else:
                     args[key] = value
         else:
@@ -51,7 +54,7 @@ def parse_args(args={}):
             else:
                 raise ValueError(arg + " is not a valid argument!")
 
-    return (site, args, path, limit)
+    return (site, args, path, newname, limit)
 
 
 def search_maps(args, site):
@@ -90,15 +93,19 @@ def get_map_list(args, site, count=None, limit=-1):
     return maps
 
 
-def download_maps(maps, path, site):
+def download_maps(maps, path, newname, site):
     for map_ in maps:
         url = MXAPI_DOWNLOAD_URL.replace(
             "{site}", site) + str(map_["TrackID"])
         r = requests.get(url)
 
         if r.status_code == 200:
-            fn = os.path.join(os.path.dirname(__file__), path, map_[
-                "GbxMapName"] + ".Map.Gbx")
+            if newname == 'mx':
+                fn = os.path.join(os.path.dirname(__file__), path, map_[
+                    "Name"] + ".Map.Gbx")
+            else:
+                fn = os.path.join(os.path.dirname(__file__), path, map_[
+                    "GbxMapName"] + ".Map.Gbx")
 
             try:
                 with open(fn, 'xb') as f:
@@ -112,7 +119,7 @@ def download_maps(maps, path, site):
 
 def main():
     # process args to get settings
-    site, args, path, limit = parse_args(DEFAULT_ARGS)
+    site, args, path, newname, limit = parse_args(DEFAULT_ARGS)
     print("Site:\t" + str(site))
     print("Args:\t" + str(args))
     print("Limit:\t" + str(limit) + "\n")
@@ -146,7 +153,7 @@ def main():
     print("\nGot map list!")
 
     # finally, download the maps
-    download_maps(maps, path, site)
+    download_maps(maps, path, newname, site)
     print("Downloaded maps!")
 
 
